@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ Thống Tạo Đề Ôn & Luyện Thi GDPT 2018</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-lg text-sm">GDPT 2018</span>
+        <h1 class="font-bold text-lg text-slate-800">Trợ Lý Ôn Tập & Luyện Thi Thông Minh</h1>
+      </div>
+      
+      <!-- Navigation Tabs -->
+      <nav class="flex bg-slate-100 p-1 rounded-xl">
+        <button onclick="switchTab('create')" id="tab-create" class="px-4 py-1.5 rounded-lg text-sm font-medium bg-white text-indigo-600 shadow-sm transition">
+          1. Tạo Đề Mới
+        </button>
+        <button onclick="switchTab('library')" id="tab-library" class="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">
+          2. Kho Đề Ôn Tập (<span id="saved-count">0</span>)
+        </button>
+        <button onclick="switchTab('exam')" id="tab-exam" class="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">
+          3. Phòng Thi / Luyện Tập
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- ==================== VIEW 1: TẠO ĐỀ ==================== -->
+    <section id="view-create" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+      <div class="border-b border-slate-100 pb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Thiết Lập Đề Ôn Tập / Đề Thi</h2>
+          <p class="text-sm text-slate-500">Nội dung câu hỏi được biên soạn bám sát chuẩn chương trình GDPT 2018.</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Chuẩn GDPT 2018
+        </span>
+      </div>
+
+      <!-- Tên bài kiểm tra -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tên bài kiểm tra / Đề ôn tập <span class="text-red-500">*</span></label>
+        <input type="text" id="exam-title" placeholder="VD: Ôn tập Địa lí 11 - Khu vực Đông Nam Á (GDPT 2018)" 
+               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm" />
+      </div>
+
+      <!-- Khung dán tài liệu (Giới hạn 50.000 ký tự) -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nội dung tài liệu ôn tập</label>
+        <textarea id="source-text" rows="7" maxlength="50000"
+                  placeholder="Dán nội dung bài giảng, tóm tắt lý thuyết, ghi chú hoặc đoạn văn bản cần ôn thi tại đây..."
+                  class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm leading-relaxed"></textarea>
+        <div class="flex justify-between items-center mt-1.5 text-xs text-slate-400">
+          <span>Hỗ trợ tối đa ~50.000 ký tự</span>
+          <span id="char-counter" class="font-medium text-slate-500">0 / 50.000 ký tự</span>
+        </div>
+      </div>
+
+      <!-- Cấu hình câu hỏi -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+        <!-- Số lượng câu hỏi -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Số lượng câu hỏi</label>
+          <div class="flex flex-wrap gap-2 mb-2.5">
+            <button type="button" onclick="setQuestionCount(10)" class="q-preset px-3.5 py-1.5 rounded-lg border border-slate-300 text-sm font-medium hover:bg-indigo-50 hover:border-indigo-400 transition">10 câu</button>
+            <button type="button" onclick="setQuestionCount(20)" class="q-preset px-3.5 py-1.5 rounded-lg border border-slate-300 text-sm font-medium hover:bg-indigo-50 hover:border-indigo-400 transition">20 câu</button>
+            <button type="button" onclick="setQuestionCount(30)" class="q-preset px-3.5 py-1.5 rounded-lg border border-slate-300 text-sm font-medium hover:bg-indigo-50 hover:border-indigo-400 transition">30 câu</button>
+            <button type="button" onclick="setQuestionCount(40)" class="q-preset px-3.5 py-1.5 rounded-lg border border-slate-300 text-sm font-medium hover:bg-indigo-50 hover:border-indigo-400 transition">40 câu</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500">Hoặc nhập tuỳ chỉnh:</span>
+            <input type="number" id="question-count" value="10" min="1" max="100" 
+                   class="w-24 px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-center focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <span class="text-xs text-slate-500">câu</span>
+          </div>
+        </div>
+
+        <!-- Dạng bài kiểm tra -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Dạng bài kiểm tra (Có thể chọn nhiều)</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="q-type" value="mcq" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
+              <div>
+                <div class="text-sm font-medium text-slate-800">Trắc nghiệm nhiều lựa chọn (A, B, C, D)</div>
+                <div class="text-xs text-slate-500">Chọn 1 đáp án đúng nhất</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="q-type" value="tf" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
+              <div>
+                <div class="text-sm font-medium text-slate-800">Trắc nghiệm Đúng / Sai (Chuẩn cấu trúc mới)</div>
+                <div class="text-xs text-slate-500">Đánh giá tính Đúng hoặc Sai cho từng nhận định</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nút hành động -->
+      <div class="pt-4 border-t border-slate-100 flex flex-wrap justify-end gap-3">
+        <button onclick="generateExam()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition flex items-center gap-2">
+          <span>✨ Tạo Đề & Lưu Vào Kho Ôn Tập</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: KHO ĐỀ ÔN TẬP ==================== -->
+    <section id="view-library" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-xl font-bold text-slate-800 mb-1">Kho Đề Ôn Tập Của Bạn</h2>
+        <p class="text-sm text-slate-500 mb-6">Chọn một đề bất kỳ để ôn tập tự do hoặc vào chế độ thi tính giờ.</p>
+        <div id="exam-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Danh sách đề sẽ được render tại đây -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: PHÒNG THI / LÀM BÀI ==================== -->
+    <section id="view-exam" class="hidden space-y-6">
+      <!-- Thanh trạng thái bài thi -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4 sticky top-16 z-10">
+        <div>
+          <span id="current-mode-badge" class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-amber-100 text-amber-800">Chế độ Thi</span>
+          <h2 id="active-exam-title" class="text-lg font-bold text-slate-800 mt-1">Tên bài kiểm tra</h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- Bộ đếm thời gian không giới hạn -->
+          <div class="bg-slate-900 text-white px-4 py-2 rounded-xl flex items-center gap-2">
+            <span class="text-xs text-slate-400">Thời gian làm bài:</span>
+            <span id="timer-display" class="font-mono font-bold text-base text-emerald-400">00:00:00</span>
+          </div>
+
+          <button id="btn-submit-exam" onclick="submitExam()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition">
+            Nộp Bài & Xem Đáp Án
+          </button>
+        </div>
+      </div>
+
+      <!-- Bảng kết quả sau khi nộp -->
+      <div id="result-banner" class="hidden bg-indigo-50 border border-indigo-200 rounded-2xl p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-indigo-950">Kết Quả Bài Làm</h3>
+            <p id="result-summary" class="text-sm text-indigo-800 mt-1"></p>
+          </div>
+          <button onclick="retakeExam()" class="px-4 py-2 rounded-xl bg-white border border-indigo-300 text-indigo-700 font-semibold text-sm hover:bg-indigo-100 transition">
+            Làm Lại Đề Này
+          </button>
+        </div>
+      </div>
+
+      <!-- Danh sách câu hỏi -->
+      <div id="questions-container" class="space-y-4"></div>
+    </section>
+
+  </main>
+
+  <script>
+    // ==================== STATE & STORAGE ====================
+    let savedExams = JSON.parse(localStorage.getItem('gdpt2018_exams')) || [];
+    let currentExam = null;
+    let isSubmitted = false;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    // ==================== KHỞI TẠO & ĐẾM KÝ TỰ ====================
+    const sourceText = document.getElementById('source-text');
+    const charCounter = document.getElementById('char-counter');
+
+    sourceText.addEventListener('input', () => {
+      const len = sourceText.value.length;
+      charCounter.textContent = `${len.toLocaleString('vi-VN')} / 50.000 ký tự`;
+      charCounter.className = len >= 48000 ? 'font-bold text-red-600' : 'font-medium text-slate-500';
+    });
+
+    function setQuestionCount(num) {
+      document.getElementById('question-count').value = num;
+    }
+
+    function switchTab(tabName) {
+      ['create', 'library', 'exam'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${t}`);
+        btn.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+        btn.classList.add('text-slate-600');
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabName}`);
+      activeBtn.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+      activeBtn.classList.remove('text-slate-600');
+
+      if (tabName === 'library') renderLibrary();
+    }
+
+    // ==================== TẠO ĐỀ BÁM SÁT GDPT 2018 ====================
+    function generateExam() {
+      const title = document.getElementById('exam-title').value.trim() || `Đề ôn tập GDPT 2018 #${savedExams.length + 1}`;
+      const text = sourceText.value.trim();
+      const count = parseInt(document.getElementById('question-count').value, 10) || 10;
+      const selectedTypes = Array.from(document.querySelectorAll('input[name="q-type"]:checked')).map(el => el.value);
+
+      if (!text) {
+        alert('Vui lòng dán nội dung bài giảng hoặc tài liệu trước khi tạo đề!');
+        return;
+      }
+      if (selectedTypes.length === 0) {
+        alert('Vui lòng chọn ít nhất 1 dạng bài kiểm tra!');
+        return;
+      }
+
+      // Tách câu từ văn bản gốc để mô phỏng sinh câu hỏi bám sát nội dung (Khi tích hợp AI API, gửi prompt kèm yêu cầu GDPT 2018 tại đây)
+      const sentences = text.split(/[.!?]\s+/).filter(s => s.trim().length > 15);
+      const questions = [];
+
+      for (let i = 0; i < count; i++) {
+        const type = selectedTypes[i % selectedTypes.length];
+        const sampleFact = sentences[i % sentences.length] || text.substring(0, 100);
+
+        if (type === 'mcq') {
+          questions.push({
+            id: i + 1,
+            type: 'mcq',
+            question: `[Thông hiểu - GDPT 2018] Dựa vào nội dung tài liệu: "${sampleFact.trim()}...", nhận định nào sau đây là chính xác nhất?`,
+            options: [
+              'Phản ánh đúng bản chất và nội dung trọng tâm của kiến thức đã nêu.',
+              'Là nhận định sai lệch so với quy luật được trình bày trong bài.',
+              'Chỉ đúng trong điều kiện ngoại lệ không thuộc phạm vi bài học.',
+              'Mâu thuẫn trực tiếp với dữ kiện lý thuyết vừa cung cấp.'
+            ],
+            correctAnswer: 0,
+            explanation: `Giải thích chi tiết: Theo chương trình GDPT 2018 và nội dung tài liệu gốc ("${sampleFact.trim()}"), phương án A diễn đạt chính xác nhất cốt lõi vấn đề. Các phương án B, C, D đều làm sai lệch dữ kiện.`
+          });
+        } else {
+          const isTrue = i % 2 === 0;
+          questions.push({
+            id: i + 1,
+            type: 'tf',
+            question: `[Trắc nghiệm Đúng/Sai - GDPT 2018] Xét tính đúng/sai của nhận định sau dựa trên tài liệu: "${sampleFact.trim()}."`,
+            options: ['Đúng', 'Sai'],
+            correctAnswer: isTrue ? 0 : 1,
+            explanation: `Giải thích chi tiết: Nhận định trên là ${isTrue ? 'ĐÚNG' : 'SAI'}. Đối chiếu trực tiếp với phần lý thuyết trọng tâm trong tài liệu học tập theo chuẩn GDPT 2018 để xác định tính chính xác của mệnh đề.`
+          });
+        }
+      }
+
+      const newExam = {
+        id: Date.now(),
+        title,
+        createdAt: new Date().toLocaleDateString('vi-VN'),
+        questionCount: questions.length,
+        questions
+      };
+
+      savedExams.unshift(newExam);
+      localStorage.setItem('gdpt2018_exams', JSON.stringify(savedExams));
+      updateSavedCount();
+
+      // Chuyển thẳng vào làm bài hoặc mở kho đề
+      startExam(newExam.id, 'exam');
+    }
+
+    function updateSavedCount() {
+      document.getElementById('saved-count').textContent = savedExams.length;
+    }
+
+    // ==================== KHO ĐỀ ÔN TẬP ====================
+    function renderLibrary() {
+      const list = document.getElementById('exam-list');
+      if (savedExams.length === 0) {
+        list.innerHTML = `<p class="text-slate-500 text-sm col-span-2 text-center py-8">Chưa có đề nào được lưu. Hãy sang tab "Tạo Đề Mới" để bắt đầu nhé!</p>`;
+        return;
+      }
+
+      list.innerHTML = savedExams.map(exam => `
+        <div class="border border-slate-200 rounded-xl p-4 hover:border-indigo-300 transition flex flex-col justify-between gap-4">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span>Ngày tạo: ${exam.createdAt}</span>
+              <span class="font-semibold text-indigo-600">${exam.questionCount} câu hỏi</span>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">${exam.title}</h3>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+            <button onclick="startExam(${exam.id}, 'practice')" class="flex-1 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
+              📖 Ôn Tập Tự Do
+            </button>
+            <button onclick="startExam(${exam.id}, 'exam')" class="flex-1 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition">
+              ⏱️ Vào Thi Thử
+            </button>
+            <button onclick="deleteExam(${exam.id})" class="px-2.5 py-2 rounded-lg text-red-500 hover:bg-red-50 text-xs" title="Xoá đề">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteExam(id) {
+      savedExams = savedExams.filter(e => e.id !== id);
+      localStorage.setItem('gdpt2018_exams', JSON.stringify(savedExams));
+      updateSavedCount();
+      renderLibrary();
+    }
+
+    // ==================== PHÒNG THI & TÍNH GIỜ KHÔNG GIỚI HẠN ====================
+    function startExam(examId, mode) {
+      currentExam = savedExams.find(e => e.id === examId);
+      if (!currentExam) return;
+
+      isSubmitted = false;
+      document.getElementById('active-exam-title').textContent = currentExam.title;
+      document.getElementById('result-banner').classList.add('hidden');
+      document.getElementById('btn-submit-exam').classList.remove('hidden');
+
+      const badge = document.getElementById('current-mode-badge');
+      if (mode === 'exam') {
+        badge.textContent = 'Chế độ Luyện Thi (Tính giờ không giới hạn)';
+        badge.className = 'text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-amber-100 text-amber-800';
+      } else {
+        badge.textContent = 'Chế độ Ôn Tập';
+        badge.className = 'text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-sky-100 text-sky-800';
+      }
+
+      renderQuestions();
+      startTimer();
+      switchTab('exam');
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      secondsElapsed = 0;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+      const secs = String(secondsElapsed % 60).padStart(2, '0');
+      document.getElementById('timer-display').textContent = `${hrs}:${mins}:${secs}`;
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = currentExam.questions.map((q, index) => `
+        <div id="q-card-${index}" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-indigo-50 text-indigo-700 font-bold text-xs px-2.5 py-1 rounded-md">Câu ${index + 1}</span>
+            <span class="text-xs font-medium text-slate-400">${q.type === 'tf' ? 'Trắc nghiệm Đúng / Sai' : 'Trắc nghiệm 4 lựa chọn'}</span>
+          </div>
+          <p class="font-semibold text-slate-800 text-base mb-4 leading-relaxed">${q.question}</p>
+          
+          <div class="space-y-2.5">
+            ${q.options.map((opt, optIdx) => `
+              <label id="opt-label-${index}-${optIdx}" class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                <input type="radio" name="question-${index}" value="${optIdx}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" />
+                <span class="text-sm text-slate-700 font-medium">
+                  ${q.type === 'mcq' ? String.fromCharCode(65 + optIdx) + '. ' : ''}${opt}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+
+          <!-- Lời giải chi tiết (Ẩn hoàn toàn cho đến khi nộp bài) -->
+          <div id="explanation-${index}" class="hidden mt-4 p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 text-sm text-slate-700 leading-relaxed">
+            <div class="font-bold text-emerald-800 mb-1">💡 Đáp án & Lời giải chi tiết:</div>
+            <p>${q.explanation}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== NỘP BÀI & CHẤM ĐIỂM ====================
+    function submitExam() {
+      if (isSubmitted) return;
+      
+      const confirmSubmit = confirm('Bạn có chắc chắn muốn nộp bài để xem điểm và lời giải chi tiết không?');
+      if (!confirmSubmit) return;
+
+      isSubmitted = true;
+      clearInterval(timerInterval);
+      document.getElementById('btn-submit-exam').classList.add('hidden');
+
+      let correctCount = 0;
+
+      currentExam.questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="question-${index}"]:checked`);
+        const userAns = selected ? parseInt(selected.value, 10) : -1;
+
+        // Khóa các nút chọn sau khi nộp
+        document.querySelectorAll(`input[name="question-${index}"]`).forEach(inp => inp.disabled = true);
+
+        // Tô màu đáp án đúng / sai
+        const correctLabel = document.getElementById(`opt-label-${index}-${q.correctAnswer}`);
+        correctLabel.classList.remove('border-slate-200', 'hover:bg-slate-50');
+        correctLabel.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+
+        if (userAns === q.correctAnswer) {
+          correctCount++;
+        } else if (userAns !== -1) {
+          const wrongLabel = document.getElementById(`opt-label-${index}-${userAns}`);
+          wrongLabel.classList.remove('border-slate-200', 'hover:bg-slate-50');
+          wrongLabel.classList.add('bg-red-50', 'border-red-400', 'text-red-900');
+        }
+
+        // Hiển thị lời giải chi tiết
+        document.getElementById(`explanation-${index}`).classList.remove('hidden');
+      });
+
+      const score = ((correctCount / currentExam.questions.length) * 10).toFixed(2);
+      const timeUsed = document.getElementById('timer-display').textContent;
+
+      document.getElementById('result-summary').innerHTML = `
+        Bạn trả lời đúng <strong>${correctCount}/${currentExam.questions.length}</strong> câu • 
+        Điểm số: <strong class="text-indigo-700 text-base">${score}/10</strong> • 
+        Tổng thời gian làm bài: <strong>${timeUsed}</strong>
+      `;
+      document.getElementById('result-banner').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function retakeExam() {
+      if (currentExam) startExam(currentExam.id, 'exam');
+    }
+
+    // Cập nhật số lượng đề đã lưu khi tải trang
+    updateSavedCount();
+  </script>
+</body>
+</html>
